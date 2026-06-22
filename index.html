@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>BaseConvert Mobile</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style>
+        body { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="h-screen w-full bg-slate-50 flex flex-col justify-between overflow-hidden select-none text-slate-800 font-sans">
+
+    <div class="bg-white px-6 pt-3 pb-1 flex justify-center items-center text-xs text-slate-500 font-bold tracking-widest border-b border-slate-50">
+        <span id="clock" class="bg-slate-100 px-3 py-0.5 rounded-full text-[11px] text-slate-600 shadow-2xs font-mono">00:00</span>
+    </div>
+
+    <header class="bg-white border-b border-slate-100 pb-4 px-4 flex items-center justify-between z-10 shadow-xs">
+        <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 font-bold text-xl">²</div>
+            <div>
+                <h1 class="text-lg font-bold text-slate-900 leading-none">BaseConvert</h1>
+                <span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded mt-1 inline-block uppercase tracking-wider">Modo Offline</span>
+            </div>
+        </div>
+        <button onclick="gerarAleatorio()" class="w-10 h-10 bg-slate-50 active:bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 transition-all active:scale-95 text-lg">🎲</button>
+    </header>
+
+    <main class="flex-grow overflow-y-auto px-4 py-4 space-y-5 pb-24">
+        
+        <div id="tab-converter" class="tab-content active space-y-4">
+            <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">Digite o Valor Decimal</label>
+                <div class="relative flex items-center">
+                    <input type="number" id="inputDecimal" value="45" oninput="calcular()" placeholder="Ex: 255" class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 px-4 text-2xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3">
+                <div class="bg-emerald-50/40 border border-emerald-100 rounded-2xl p-4 flex flex-col justify-between">
+                    <span class="text-[10px] font-bold text-emerald-800 tracking-wider uppercase mb-1">Binário (Base 2)</span>
+                    <div id="resBin" class="text-2xl font-black text-emerald-950 font-mono tracking-wide break-all">0</div>
+                </div>
+                <div class="bg-purple-50/40 border border-purple-100 rounded-2xl p-4 flex flex-col justify-between">
+                    <span class="text-[10px] font-bold text-purple-800 tracking-wider uppercase mb-1">Hexadecimal (Base 16)</span>
+                    <div id="resHex" class="text-2xl font-black text-purple-950 font-mono tracking-wide break-all">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-reference" class="tab-content space-y-4">
+            <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-2">📌 Conversões Rápidas</h3>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs font-mono">
+                    <div class="font-bold text-slate-400">DEC</div><div class="font-bold text-emerald-600">BIN</div><div class="font-bold text-purple-600">HEX</div>
+                    <div>0</div><div>0000</div><div>0</div>
+                    <div>1</div><div>0001</div><div>1</div>
+                    <div>2</div><div>0010</div><div>2</div>
+                    <div>10</div><div>1010</div><div>A</div>
+                    <div>15</div><div>1111</div><div>F</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-about" class="tab-content space-y-4 text-center">
+            <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-3">
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mx-auto font-bold">📱</div>
+                <h3 class="font-bold text-slate-800 text-lg">BaseConvert App</h3>
+                <p class="text-slate-600 text-sm">Aplicativo Móvel Nativo Completo.</p>
+            </div>
+        </div>
+    </main>
+
+    <nav class="bg-white border-t border-slate-100 py-3.5 px-6 flex justify-around items-center fixed bottom-0 left-0 right-0 z-20 shadow-md">
+        <button onclick="switchTab('converter')" class="flex flex-col items-center gap-1 text-indigo-600 font-bold text-xs">🔢 <span>Conversor</span></button>
+        <button onclick="switchTab('reference')" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-xs">📖 <span>Guia</span></button>
+        <button onclick="switchTab('about')" class="flex flex-col items-center gap-1 text-slate-400 font-bold text-xs">ℹ️ <span>Sobre</span></button>
+    </nav>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        function calcular() {
+            let val = parseInt(document.getElementById('inputDecimal').value);
+            if (isNaN(val) || val < 0) {
+                document.getElementById('resBin').innerText = '0';
+                document.getElementById('resHex').innerText = '0';
+                return;
+            }
+            document.getElementById('resBin').innerText = val.toString(2);
+            document.getElementById('resHex').innerText = val.toString(16).toUpperCase();
+        }
+
+        function gerarAleatorio() {
+            document.getElementById('inputDecimal').value = Math.floor(Math.random() * 255) + 1;
+            calcular();
+            switchTab('converter');
+        }
+        calcular();
+    </script>
+</body>
+</html>
