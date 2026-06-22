@@ -19,6 +19,10 @@ jobs:
       with:
         node-version: 20
 
+    - name: Initialize Package JSON
+      run: |
+        npm init -y
+
     - name: Install Capacitor
       run: |
         npm install @capacitor/cli @capacitor/core @capacitor/android
